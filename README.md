@@ -22,4 +22,4 @@ Open http://localhost:8000/docs to see and use all provided Addresses API routes
 (or use Postman to execute the requests)
 
 
-![docs](https://ibb.co/jkDjPjM)
+![docs](https://i.ibb.co/yFqxcxy/docs.png)
