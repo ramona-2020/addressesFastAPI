@@ -1,4 +1,4 @@
-# Change the current working directory to the location where you want the cloned repository.
+Change the current working directory to the location where you want the cloned repository.
 1. Open Terminal
 2. Type mkdir my_fastapi_project
 3. Type cd my_fastapi_project
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 9. Run this command to start the FastAPI HTTP server with Uvicorn.
 uvicorn main:app --host localhost --port 8000 --reload
 
-![terminal](https://ibb.co/p2bfQ3g)
+![terminal](https://i.ibb.co/mJb90Hm/terminal.png)
 
 Actions:
 Once the FastAPI server is listening on port 8000, open a new tab in your browser and visit http://localhost:8000/ to see the JSON object sent by the server.
