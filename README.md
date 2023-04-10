@@ -2,7 +2,7 @@ Change the current working directory to the location where you want the cloned r
 1. Open Terminal
 2. Type mkdir my_fastapi_project
 3. Type cd my_fastapi_project
-4.To clone the repository:
+4. To clone the repository:
 Type git clone git@github.com:ramona-2020/addressesFastAPI.git
 5. Press Enter to create your local clone.
 6. Type cd addressesFastAPI
