@@ -5,7 +5,7 @@ from sqlalchemy import Column, String, Float
 Base = declarative_base()
 
 class Address(Base):
-    __tablename__ = 'addresses"'
+    __tablename__ = 'addresses'
     id = Column(GUID, primary_key=True, default=GUID_DEFAULT_SQLITE)
     address = Column(String, nullable=False)
     latitude = Column(Float, nullable=False)

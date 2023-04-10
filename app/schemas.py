@@ -17,20 +17,24 @@ def validate_longitude(value: float) -> float:
     :return:
     """
     if not -180 <= abs(value) <= 180:
-        raise ValueError("Latitude must be between -180 and 180")
+        raise ValueError("Longitude must be between -180 and 180")
     return value
 
 class AddressBaseSchema(BaseModel):
-    id : str | None = None
+    id : str
+
+    # provide configurations to Pydantic
+    class Config:
+        orm_mode = True # map the ORM models to ORM object - tell the Pydantic model to read the data
+                        # even if it is not a dict, but an ORM model (or any other arbitrary object with attributes).
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class CreateAddressRequest(BaseModel):
     address : str
     latitude : float
     longitude : float
 
-    # Validation for latitude:
+    # Validation for latitude and longitude:
     _check_latitude = validator("latitude")(validate_latitude)
     _check_longitude = validator("longitude")(validate_longitude)
-
-    class Config:
-        orm_mode = True # map the models to ORM object
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True

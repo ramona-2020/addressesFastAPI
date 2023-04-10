@@ -4,9 +4,12 @@ from sqlalchemy.orm import sessionmaker
 
 SQLITE_DATABASE_URL = "sqlite:///./addresses.db"
 
+# Create Engine
 engine = create_engine(
     SQLITE_DATABASE_URL, echo=True, connect_args={"check_same_thread": False}
 )
+
+# Create Session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
