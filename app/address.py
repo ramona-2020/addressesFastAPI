@@ -1,15 +1,14 @@
 import logging
-from typing import List
-
-from sqlalchemy.orm import Session
 
 from app import models
-from app.schemas import AddressBaseSchema as Address
-from app.schemas import CreateAddressRequest
-
-from fastapi import APIRouter, Depends, status, HTTPException
 
 from app.database import get_db
+
+from app.schemas import AddressBase
+
+from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, status, HTTPException
+
 from math import radians, sin, cos, sqrt, atan2
 
 # init our logger
@@ -29,44 +28,68 @@ def haversine(lat1, lon1, lat2, lon2):
 
 # CRUD Routes
 
-@router.get('/address_id', response_model=Address)
-async def get_address(address_id: str, db: Session):
-    address = db.query(Address).filter(Address.id == address_id).first()
-    return address
+@router.get('/address_id')
+async def get_address(address_id: str, db: Session = Depends(get_db)):
+    db_address = db.query(models.Address).filter(models.Address.id == address_id).first()
+    if not db_address:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'No address with this id: {address_id} found')
+    return db_address
 
 # Response will be a LIST of Address
-@router.get('/addresses', response_model=List[Address])
+@router.get('/addresses')
 async def get_addresses(db: Session = Depends(get_db)):
-    addresses = db.query(Address).all()
+    query = db.query(models.Address)
+    addresses = query.all()
     logger.info('Getting addresses from database... [SUCCESS].')
     return addresses
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
-async def create_address(request: CreateAddressRequest,
+@router.post('/')
+async def create_address(address: AddressBase,
                          db: Session = Depends(get_db)):
     """
     Create data - used to create a new address
-    :param request:
+    :param address:
     :param db:
     :return: JSON representation
     """
-    new_address = Address(**request.dict())
+    new_address = models.Address(address=address.address,
+                                 latitude=address.latitude,
+                                 longitude=address.longitude)
+
+    # Generate a dictionary representation of the model, optionally specifying which fields to include or
+    # exclude
+    # add it to the session and commit it
+
     db.add(new_address) # that instance object to your database session.
     db.commit() # the changes to the database (so that they are saved)
-    db.refresh(new_address) # your instance (so that it contains any new data from the database, like the generated ID).
+
+    # update the patient instance to get the newly created Id
+    db.refresh(new_address)
+
     logger.info('Created addresses... [SUCCESS].')
     return new_address
 
-@router.patch('/address_id', response_model=Address)
+@router.put('/address_id')
 async def update_address(address_id: str,
+                         address: AddressBase,
                          db: Session = Depends(get_db)):
-    address = db.query(Address).filter(models.Address.id == address_id).first()
-    return address
+    note_query = db.query(models.Address).filter(models.Address.id == address_id)
+    db_note = note_query.first()
+
+    if not db_note:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'No note with this id: {address_id} found')
+    update_data = address.dict(exclude_unset=True)
+    note_query.filter(models.Address.id == address_id).update(update_data, synchronize_session=False)
+    db.commit()
+    db.refresh(db_note)
+    return {"status": "success", "address": db_note}
 
 @router.delete('/{address_id}')
 async def delete_address(address_id: str,
                          db: Session = Depends(get_db)):
-    db_address = db.query(Address).get(address_id)
+    db_address = db.query(models.Address).get(address_id)
     if not db_address:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No address with this id: {address_id} found')
@@ -81,7 +104,7 @@ async def get_addresses_within_distance(latitude: float,
                                         longitude: float,
                                         distance: float,
                                         session: Session = Depends(get_db)):
-    db_addresses = session.query(CreateAddressRequest).all()
+    db_addresses = session.query(models.Address).all()
 
     addresses_within_distance = []
     for address in db_addresses:
@@ -92,4 +115,3 @@ async def get_addresses_within_distance(latitude: float,
     return {"status": "Addresses within given distance",
             'results': len(addresses_within_distance),
             'addresses': addresses_within_distance}
-

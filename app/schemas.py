@@ -20,8 +20,16 @@ def validate_longitude(value: float) -> float:
         raise ValueError("Longitude must be between -180 and 180")
     return value
 
-class AddressBaseSchema(BaseModel):
-    id : str
+
+class AddressBase(BaseModel):
+    id: str | None = None
+    address : str
+    latitude : float
+    longitude : float
+
+    # Validation for latitude and longitude:
+    _check_latitude = validator("latitude")(validate_latitude)
+    _check_longitude = validator("longitude")(validate_longitude)
 
     # provide configurations to Pydantic
     class Config:
@@ -30,11 +38,4 @@ class AddressBaseSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-class CreateAddressRequest(BaseModel):
-    address : str
-    latitude : float
-    longitude : float
 
-    # Validation for latitude and longitude:
-    _check_latitude = validator("latitude")(validate_latitude)
-    _check_longitude = validator("longitude")(validate_longitude)
