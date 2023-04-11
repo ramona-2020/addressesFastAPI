@@ -1,4 +1,7 @@
-from pydantic import BaseModel, validator
+from typing import Optional
+
+from pydantic import BaseModel, validator, Field
+
 
 def validate_latitude(value: float) -> float:
     """
@@ -21,9 +24,15 @@ def validate_longitude(value: float) -> float:
     return value
 
 
+class CreateAddress(BaseModel):
+    id: str
+    address: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
 class AddressBase(BaseModel):
-    id: str | None = None
-    address : str
+    id: Optional[str]= None
+    address : str = Field(min_length=10, max_length=255)
     latitude : float
     longitude : float
 
@@ -37,5 +46,12 @@ class AddressBase(BaseModel):
                         # even if it is not a dict, but an ORM model (or any other arbitrary object with attributes).
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+        schema_extra = {
+            "example": {
+                "address": "Address description",
+                "latitude": "Address latitude",
+                "longitude": "Address longitude",
+            }
+        }
 
 
